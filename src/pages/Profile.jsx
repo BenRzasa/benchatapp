@@ -1,28 +1,66 @@
 import React, { useState, useContext } from "react";
-import apiClient from "../api/apiClient";
+import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
+import apiClient from "../api/apiClient";
 import "../styles/Profile.css";
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [color, setColor] = useState("");
+  const { user, logout } = useContext(AuthContext);
+  const [firstName, setFirstName] = useState(user?.firstName || "");
+  const [lastName, setLastName] = useState(user?.lastName || "");
+  const [bio, setBio] = useState(user?.bio || "");
+  const [profilePicture, setProfilePicture] = useState(user?.profilePicture || "");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await apiClient.post("/api/auth/update-profile", { firstName, lastName, color });
+      await apiClient.post("/api/auth/update-profile", {
+        firstName,
+        lastName,
+        bio,
+        profilePicture,
+      });
       alert("Profile updated successfully!");
+      navigate("/"); // Redirect to main page after saving
     } catch (error) {
-      console.error("Profile update failed:", error);
+      setError("Failed to update profile.");
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result); // Update profile picture state
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   return (
     <div className="profile-container">
-      <h1>Profile</h1>
+      <div className="header">
+        <h1>Profile</h1>
+        <button onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
       <form onSubmit={handleSubmit}>
+        <div className="profile-picture">
+          <img
+            src={profilePicture || "https://via.placeholder.com/150"}
+            alt="Profile"
+          />
+          <input type="file" accept="image/*" onChange={handleFileUpload} />
+        </div>
         <input
           type="text"
           placeholder="First Name"
@@ -35,13 +73,13 @@ const Profile = () => {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
-        <input
-          type="text"
-          placeholder="Favorite Color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
+        <textarea
+          placeholder="About Me"
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
         />
-        <button type="submit">Update Profile</button>
+        {error && <p className="error">{error}</p>}
+        <button type="submit">Save</button>
       </form>
     </div>
   );

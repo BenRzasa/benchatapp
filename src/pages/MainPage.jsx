@@ -9,6 +9,7 @@ const MainPage = () => {
   const navigate = useNavigate();
   const [chatRooms, setChatRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   // Fetch chat rooms on component mount
   useEffect(() => {
@@ -39,7 +40,7 @@ const MainPage = () => {
     navigate("/");
   };
 
-  // If the user is not logged in, show the Login/Signup screen
+  // If the user is not logged in, show the Welcome page
   if (!user) {
     return (
       <div className="welcome-container">
@@ -56,23 +57,32 @@ const MainPage = () => {
   return (
     <div className="main-page">
       <div className="header">
+        <h1>Welcome to Benchat, {user.firstName || "User"}!</h1>
         <div className="buttons">
           <button onClick={() => navigate("/profile")}>Profile</button>
           <button onClick={() => navigate("/chat")}>Chat Rooms</button>
           <button onClick={handleLogout}>Logout</button>
         </div>
-        <h1>Hello, {user.firstName || "User"}!</h1>
       </div>
       <div className="content">
-        <div className="chat-room-list">
-          <h2>Chat Rooms</h2>
-          <ul>
-            {chatRooms
-              .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
-              .map((room) => (
-                <li key={room.id}>{room.name}</li>
-              ))}
-          </ul>
+        <div className="radio-container" style={{ "--total-radio": chatRooms.length }}>
+          <div className="glider-container">
+            <div className="glider"></div>
+          </div>
+          {chatRooms
+            .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
+            .map((room, index) => (
+              <div key={room.id}>
+                <input
+                  type="radio"
+                  id={`room-${room.id}`}
+                  name="room"
+                  checked={selectedRoom === room.id}
+                  onChange={() => setSelectedRoom(room.id)}
+                />
+                <label htmlFor={`room-${room.id}`}>{room.name}</label>
+              </div>
+            ))}
         </div>
         {chatRooms.length === 0 && (
           <div className="create-room-popup">

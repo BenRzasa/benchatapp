@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
-import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
 import "../styles/Login.css";
 
 const Login = () => {
@@ -19,6 +19,10 @@ const Login = () => {
     } catch (error) {
       setError("Login failed. Please check your credentials.");
     }
+  };
+
+  const handleBackToHome = () => {
+    navigate("/");
   };
 
   return (
@@ -41,6 +45,9 @@ const Login = () => {
         />
         {error && <p className="error">{error}</p>}
         <button type="submit">Login</button>
+        <button type="button" onClick={handleBackToHome} className="back-button">
+          Back to Home
+        </button>
       </form>
     </div>
   );

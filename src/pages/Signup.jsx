@@ -34,6 +34,10 @@ const Signup = () => {
     }
   };
 
+  const handleBackToHome = () => {
+    navigate("/");
+  };
+
   return (
     <div className="signup-container">
       <h1>Signup</h1>
@@ -75,6 +79,9 @@ const Signup = () => {
         />
         {error && <p className="error">{error}</p>}
         <button type="submit">Signup</button>
+        <button type="button" onClick={handleBackToHome} className="back-button">
+          Back to Home
+        </button>
       </form>
     </div>
   );
