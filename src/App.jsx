@@ -6,12 +6,10 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import WelcomePage from "./pages/WelcomePage";
-import RoomPage from "./pages/RoomPage";
 import "./styles/global.css";
 
 const App = () => {
   const { user } = useContext(AuthContext);
-  console.log("User state in App:", user);
 
   return (
     <Router>
@@ -31,10 +29,6 @@ const App = () => {
         <Route
           path="/profile"
           element={user ? <Profile /> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/room/:roomId"
-          element={user ? <RoomPage /> : <Navigate to="/login" />}
         />
 
         {/* Fallback route */}

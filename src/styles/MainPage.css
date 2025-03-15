@@ -206,23 +206,19 @@
 }
 
 .contact-list ul {
-  list-style: none;
+  list-style-type: none;
   padding: 0;
 }
 
 .contact-list li {
   padding: 10px;
-  font-size: 1rem;
-  color: #fff;
+  border-bottom: 1px solid #ccc;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
 }
 
 .contact-list li:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #f0f0f0;
 }
-
 /* Search Contacts Styles */
 .search-contacts {
   position: absolute; /* Position the search section absolutely */

@@ -1,9 +1,9 @@
-// src/components/MainPage.js
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import socket from "../api/socket";
-import axios from "axios";
+import ContactList from "../components/ContactList";
+import SearchContacts from "../components/SearchContacts";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
@@ -11,19 +11,22 @@ const MainPage = () => {
   const navigate = useNavigate();
   const [chatRooms, setChatRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState("");
-  const [contacts, setContacts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  // Fetch chat rooms on component mount
   useEffect(() => {
     if (user) {
       fetchChatRooms();
-      fetchContacts();
-
-      // Listen for updates to the room list
       socket.on("roomList", (rooms) => {
         setChatRooms(rooms);
       });
-
       return () => {
         socket.off("roomList");
       };
@@ -34,35 +37,19 @@ const MainPage = () => {
     socket.emit("getRooms");
   };
 
-  const fetchContacts = async () => {
-    try {
-      const response = await axios.post(
-        "https://quality-visually-stinkbug.ngrok-free.app/api/contacts/search",
-        { searchTerm },
-        {
-          withCredentials: true,
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        }
-      );
-      setContacts(response.data.contacts);
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
-    }
-  };
-
   const handleCreateRoom = () => {
     if (newRoomName.trim()) {
-      socket.emit("createRoom", { name: newRoomName, userId: user.id });
+      socket.emit("createRoom", { name: newRoomName });
       setNewRoomName("");
       alert("Room created successfully!");
+      fetchChatRooms();
     } else {
       alert("Please enter a valid room name.");
     }
   };
 
   const handleEnterRoom = (roomId) => {
+    setSelectedRoom(roomId);
     navigate(`/room/${roomId}`);
   };
 
@@ -74,7 +61,7 @@ const MainPage = () => {
   return (
     <div className="main-page">
       <div className="header">
-        <h1>Welcome to Benchat, {user.firstName || "User"}!</h1>
+        <h1>Welcome to Benchat, {user?.firstName || "User"}!</h1>
         <div className="buttons">
           <button onClick={() => navigate("/profile")}>Profile</button>
           <button className="logout-button" onClick={handleLogout}>
@@ -83,7 +70,6 @@ const MainPage = () => {
         </div>
       </div>
       <div className="content">
-        {/* Left Side: Chat Rooms */}
         <div className="left-side">
           <div className="chat-room-list">
             <h2>Chat Rooms</h2>
@@ -99,30 +85,11 @@ const MainPage = () => {
           </div>
         </div>
 
-        {/* Right Side: Contacts and Search */}
         <div className="right-side">
-          <div className="contact-list">
-            <h2>Contacts</h2>
-            <ul>
-              {contacts.map((contact) => (
-                <li key={contact.id}>{contact.name}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="search-contacts">
-            <h2>Search Contacts</h2>
-            <input
-              type="text"
-              placeholder="Search by name or email"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button onClick={fetchContacts}>Search</button>
-          </div>
+          <ContactList />
+          <SearchContacts /> {/* Replace the placeholder search with the SearchContacts component */}
         </div>
 
-        {/* Create Room Popup */}
         {chatRooms.length === 0 && (
           <div className="create-room-popup">
             <p>No chat rooms created yet. Create one below:</p>
