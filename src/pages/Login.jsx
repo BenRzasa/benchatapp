@@ -10,30 +10,31 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  // Handle login form submission
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      await login(email, password);
-      navigate("/");
+      await login(email, password); // Call the login function from AuthContext
+      console.log("Login successful, redirecting to /main"); // Log redirection
+      navigate("/mainpage");
     } catch (error) {
-      setError("Login failed. Please check your credentials.");
+      console.error("Login error:", error); // Log the error
+      setError("Login failed. Please check your email and password.");
     }
-  };
-
-  const handleBackToHome = () => {
-    navigate("/");
   };
 
   return (
     <div className="login-container">
       <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
+      {error && <p className="error">{error}</p>}
+      <form onSubmit={handleLogin}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="username" // Enable auto-fill for email
           required
         />
         <input
@@ -41,14 +42,14 @@ const Login = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password" // Enable auto-fill for password
           required
         />
-        {error && <p className="error">{error}</p>}
         <button type="submit">Login</button>
-        <button type="button" onClick={handleBackToHome} className="back-button">
-          Back to Home
-        </button>
       </form>
+      <p style={{ color: "#fff" }}>
+        Don't have an account? <a href="/signup" style={{ color: "#00bcd4" }}>Sign up</a>
+      </p>
     </div>
   );
 };

@@ -1,7 +1,9 @@
+// src/components/MainPage.js
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import socket from "../api/socket";
+import axios from "axios";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
@@ -9,13 +11,15 @@ const MainPage = () => {
   const navigate = useNavigate();
   const [chatRooms, setChatRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState("");
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch chat rooms on component mount
   useEffect(() => {
     if (user) {
-      socket.emit("getRooms");
+      fetchChatRooms();
+      fetchContacts();
 
+      // Listen for updates to the room list
       socket.on("roomList", (rooms) => {
         setChatRooms(rooms);
       });
@@ -26,64 +30,99 @@ const MainPage = () => {
     }
   }, [user]);
 
-  // Handle creating a new chat room
-  const handleCreateRoom = () => {
-    if (newRoomName.trim()) {
-      socket.emit("createRoom", { name: newRoomName });
-      setNewRoomName("");
+  const fetchChatRooms = () => {
+    socket.emit("getRooms");
+  };
+
+  const fetchContacts = async () => {
+    try {
+      const response = await axios.post(
+        "https://quality-visually-stinkbug.ngrok-free.app/api/contacts/search",
+        { searchTerm },
+        {
+          withCredentials: true,
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
+        }
+      );
+      setContacts(response.data.contacts);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
     }
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const handleCreateRoom = () => {
+    if (newRoomName.trim()) {
+      socket.emit("createRoom", { name: newRoomName, userId: user.id });
+      setNewRoomName("");
+      alert("Room created successfully!");
+    } else {
+      alert("Please enter a valid room name.");
+    }
   };
 
-  // If the user is not logged in, show the Welcome page
-  if (!user) {
-    return (
-      <div className="welcome-container">
-        <h1>Welcome to Benchat!</h1>
-        <div className="auth-buttons">
-          <button onClick={() => navigate("/login")}>Login</button>
-          <button onClick={() => navigate("/signup")}>Signup</button>
-        </div>
-      </div>
-    );
-  }
+  const handleEnterRoom = (roomId) => {
+    navigate(`/room/${roomId}`);
+  };
 
-  // If the user is logged in, show the Main Page
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="main-page">
       <div className="header">
         <h1>Welcome to Benchat, {user.firstName || "User"}!</h1>
         <div className="buttons">
           <button onClick={() => navigate("/profile")}>Profile</button>
-          <button onClick={() => navigate("/chat")}>Chat Rooms</button>
-          <button onClick={handleLogout}>Logout</button>
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
       <div className="content">
-        <div className="radio-container" style={{ "--total-radio": chatRooms.length }}>
-          <div className="glider-container">
-            <div className="glider"></div>
+        {/* Left Side: Chat Rooms */}
+        <div className="left-side">
+          <div className="chat-room-list">
+            <h2>Chat Rooms</h2>
+            <ul>
+              {chatRooms
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((room) => (
+                  <li key={room.id} onClick={() => handleEnterRoom(room.id)}>
+                    {room.name}
+                  </li>
+                ))}
+            </ul>
           </div>
-          {chatRooms
-            .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically
-            .map((room, index) => (
-              <div key={room.id}>
-                <input
-                  type="radio"
-                  id={`room-${room.id}`}
-                  name="room"
-                  checked={selectedRoom === room.id}
-                  onChange={() => setSelectedRoom(room.id)}
-                />
-                <label htmlFor={`room-${room.id}`}>{room.name}</label>
-              </div>
-            ))}
         </div>
+
+        {/* Right Side: Contacts and Search */}
+        <div className="right-side">
+          <div className="contact-list">
+            <h2>Contacts</h2>
+            <ul>
+              {contacts.map((contact) => (
+                <li key={contact.id}>{contact.name}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="search-contacts">
+            <h2>Search Contacts</h2>
+            <input
+              type="text"
+              placeholder="Search by name or email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button onClick={fetchContacts}>Search</button>
+          </div>
+        </div>
+
+        {/* Create Room Popup */}
         {chatRooms.length === 0 && (
           <div className="create-room-popup">
             <p>No chat rooms created yet. Create one below:</p>

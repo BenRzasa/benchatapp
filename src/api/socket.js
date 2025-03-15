@@ -1,3 +1,4 @@
+// src/api/socket.js
 import { io } from "socket.io-client";
 
 const SERVER_URL = "https://quality-visually-stinkbug.ngrok-free.app";

@@ -1,54 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import AuthContext from "../context/AuthContext";
 import socket from "../api/socket";
-import "../styles/ChatRoom.css";
 
-const ChatRoomList = ({ onRoomSelect }) => {
+const ChatRoomList = () => {
+  const { user } = useContext(AuthContext);
   const [chatRooms, setChatRooms] = useState([]);
-  const [newRoomName, setNewRoomName] = useState("");
 
-  // Fetch existing chat rooms on component mount
   useEffect(() => {
-    socket.emit("getRooms");
+    if (user) {
+      socket.emit("getRooms");
 
-    socket.on("roomList", (rooms) => {
-      setChatRooms(rooms);
-    });
+      socket.on("roomList", (rooms) => {
+        setChatRooms(rooms);
+      });
 
-    return () => {
-      socket.off("roomList");
-    };
-  }, []);
-
-  // Handle creating a new chat room
-  const handleCreateRoom = () => {
-    if (newRoomName.trim()) {
-      socket.emit("createRoom", { name: newRoomName });
-      setNewRoomName("");
+      return () => {
+        socket.off("roomList");
+      };
     }
-  };
-
-  // Handle selecting a chat room
-  const handleRoomSelect = (room) => {
-    onRoomSelect(room);
-  };
+  }, [user]);
 
   return (
-    <div className="chat-room-list">
+    <div>
       <h2>Chat Rooms</h2>
-      <div className="create-room">
-        <input
-          type="text"
-          placeholder="New Room Name"
-          value={newRoomName}
-          onChange={(e) => setNewRoomName(e.target.value)}
-        />
-        <button onClick={handleCreateRoom}>Create Room</button>
-      </div>
       <ul>
         {chatRooms.map((room) => (
-          <li key={room.id} onClick={() => handleRoomSelect(room)}>
-            {room.name}
-          </li>
+          <li key={room.id}>{room.name}</li>
         ))}
       </ul>
     </div>

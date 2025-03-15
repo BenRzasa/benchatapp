@@ -5,7 +5,7 @@ import apiClient from "../api/apiClient";
 import "../styles/Profile.css";
 
 const Profile = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -23,15 +23,10 @@ const Profile = () => {
         profilePicture,
       });
       alert("Profile updated successfully!");
-      navigate("/"); // Redirect to main page after saving
+      navigate("/mainpage"); // Redirect to main page after saving
     } catch (error) {
       setError("Failed to update profile.");
     }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
   };
 
   const handleFileUpload = (e) => {
@@ -47,12 +42,10 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <div className="header">
-        <h1>Profile</h1>
-        <button onClick={handleLogout} className="logout-button">
-          Logout
-        </button>
-      </div>
+      {/* Add the header here */}
+      <h1 className="profile-header">
+        {firstName} {lastName}'s Profile
+      </h1>
       <form onSubmit={handleSubmit}>
         <div className="profile-picture">
           <img

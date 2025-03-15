@@ -7,8 +7,6 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -24,13 +22,24 @@ const Signup = () => {
       await apiClient.post("/api/auth/signup", {
         email,
         password,
-        firstName,
-        lastName,
       });
       alert("Signup successful! Please login.");
       navigate("/login");
     } catch (error) {
-      setError("Signup failed. Please try again.");
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            setError("Missing email or password.");
+            break;
+          case 409:
+            setError("The email is already in use.");
+            break;
+          default:
+            setError("Signup failed. Please try again.");
+        }
+      } else {
+        setError("Signup failed. Please try again.");
+      }
     }
   };
 
@@ -61,20 +70,6 @@ const Signup = () => {
           placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
           required
         />
         {error && <p className="error">{error}</p>}
