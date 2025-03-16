@@ -1,14 +1,21 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Reset state when the component mounts
+  useEffect(() => {
+    setEmail("");
+    setPassword("");
+    setError("");
+  }, []);
 
   // Handle login form submission
   const handleLogin = async (e) => {

@@ -1,33 +1,22 @@
-import React, { useState, useEffect, useContext } from "react";
-import AuthContext from "../context/AuthContext";
-import socket from "../api/socket";
+import React from "react";
 
-const ChatRoomList = () => {
-  const { user } = useContext(AuthContext);
-  const [chatRooms, setChatRooms] = useState([]);
-
-  useEffect(() => {
-    if (user) {
-      socket.emit("getRooms");
-
-      socket.on("roomList", (rooms) => {
-        setChatRooms(rooms);
-      });
-
-      return () => {
-        socket.off("roomList");
-      };
-    }
-  }, [user]);
-
+const ChatRoomList = ({ chatRooms, onEnterRoom, isLoading, error }) => {
   return (
-    <div>
+    <div className="chat-room-list">
       <h2>Chat Rooms</h2>
-      <ul>
-        {chatRooms.map((room) => (
-          <li key={room.id}>{room.name}</li>
-        ))}
-      </ul>
+      {error && <p className="error-message">{error}</p>}
+      {chatRooms.length === 0 && !isLoading && (
+        <p>No chat rooms. Create one below:</p>
+      )}
+      <div className="scrollable-list">
+        <ul>
+          {chatRooms.map((room) => (
+            <li key={room.id} onClick={() => onEnterRoom(room.id)}>
+              {room.name}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

@@ -4,6 +4,7 @@ import AuthContext from "../context/AuthContext";
 import socket from "../api/socket";
 import ContactList from "../components/ContactList";
 import SearchContacts from "../components/SearchContacts";
+import ChatRoomList from "../components/ChatRoomList";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
@@ -11,27 +12,43 @@ const MainPage = () => {
   const navigate = useNavigate();
   const [chatRooms, setChatRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState("");
-  const [selectedRoom, setSelectedRoom] = useState(null);
-
-  // Redirect to login if user is not authenticated
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+  const [contacts, setContacts] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoadingRooms, setIsLoadingRooms] = useState(false); // Initially disabled
+  const [roomError, setRoomError] = useState("");
 
   // Fetch chat rooms on component mount
   useEffect(() => {
     if (user) {
       fetchChatRooms();
+
+      // Listen for updated room lists from the server
       socket.on("roomList", (rooms) => {
         setChatRooms(rooms);
       });
+
+      // Listen for new rooms created by the current user
+      socket.on("roomCreated", (newRoom) => {
+        setChatRooms((prevRooms) => [...prevRooms, newRoom]);
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
+        setErrorMessage("");
+      });
+
+      // Listen for errors
+      socket.on("roomError", (error) => {
+        setRoomError(error);
+      });
+
+      // Cleanup listeners on unmount
       return () => {
         socket.off("roomList");
+        socket.off("roomCreated");
+        socket.off("roomError");
       };
     }
-  }, [user]);
+  }, [user]); // Only re-run if the user changes
 
   const fetchChatRooms = () => {
     socket.emit("getRooms");
@@ -39,23 +56,50 @@ const MainPage = () => {
 
   const handleCreateRoom = () => {
     if (newRoomName.trim()) {
-      socket.emit("createRoom", { name: newRoomName });
-      setNewRoomName("");
-      alert("Room created successfully!");
-      fetchChatRooms();
+      socket.emit("createRoom", { name: newRoomName }, (response) => {
+        if (response.success) {
+          setNewRoomName("");
+        } else {
+          setRoomError("Failed to create room. Please try again.");
+        }
+      });
     } else {
-      alert("Please enter a valid room name.");
+      setRoomError("Please enter a valid room name.");
     }
   };
 
   const handleEnterRoom = (roomId) => {
-    setSelectedRoom(roomId);
+    setIsLoadingRooms(true); // Enable loading when a room is selected
     navigate(`/room/${roomId}`);
   };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleAddContact = (newContact) => {
+    console.log("New Contact:", newContact); // Debugging
+
+    const firstName = newContact.firstName;
+    const lastName = newContact.lastName;
+
+    if (!firstName || !lastName) {
+      alert("Invalid contact data. Please try again.");
+      return;
+    }
+
+    const isContactAlreadyAdded = contacts.some(
+      (contact) =>
+        contact.firstName.toLowerCase() === firstName.toLowerCase() &&
+        contact.lastName.toLowerCase() === lastName.toLowerCase()
+    );
+
+    if (!isContactAlreadyAdded) {
+      setContacts((prevContacts) => [...prevContacts, newContact]);
+    } else {
+      alert("Contact already added!");
+    }
   };
 
   return (
@@ -71,37 +115,32 @@ const MainPage = () => {
       </div>
       <div className="content">
         <div className="left-side">
-          <div className="chat-room-list">
-            <h2>Chat Rooms</h2>
-            <ul>
-              {chatRooms
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((room) => (
-                  <li key={room.id} onClick={() => handleEnterRoom(room.id)}>
-                    {room.name}
-                  </li>
-                ))}
-            </ul>
+          <ChatRoomList
+            chatRooms={chatRooms}
+            onEnterRoom={handleEnterRoom}
+            isLoading={isLoadingRooms}
+            error={roomError}
+          />
+          <div className="create-room-section">
+            <input
+              type="text"
+              placeholder="New Room Name"
+              value={newRoomName}
+              onChange={(e) => setNewRoomName(e.target.value)}
+            />
+            <button onClick={handleCreateRoom}>Create Room</button>
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
           </div>
         </div>
 
         <div className="right-side">
-          <ContactList />
-          <SearchContacts /> {/* Replace the placeholder search with the SearchContacts component */}
+          <ContactList contacts={contacts} />
+          <SearchContacts onAddContact={handleAddContact} />
         </div>
 
-        {chatRooms.length === 0 && (
-          <div className="create-room-popup">
-            <p>No chat rooms created yet. Create one below:</p>
-            <div className="create-room-input">
-              <input
-                type="text"
-                placeholder="New Room Name"
-                value={newRoomName}
-                onChange={(e) => setNewRoomName(e.target.value)}
-              />
-              <button onClick={handleCreateRoom}>Create Room</button>
-            </div>
+        {showPopup && (
+          <div className="success-popup">
+            <p>Room "{newRoomName}" created successfully!</p>
           </div>
         )}
       </div>

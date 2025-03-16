@@ -1,4 +1,3 @@
-// src/components/ChatRoom.js
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
@@ -11,12 +10,14 @@ const ChatRoom = () => {
   const { roomId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true); // Enable loading when entering the room
 
   useEffect(() => {
     socket.emit("joinRoom", { roomId });
 
     socket.on("receiveMessage", (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
+      setIsLoading(false); // Disable loading once messages are received
     });
 
     return () => {
@@ -33,10 +34,6 @@ const ChatRoom = () => {
         content: newMessage,
         messageType: "text",
       });
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { sender: user.id, content: newMessage, messageType: "text" },
-      ]);
       setNewMessage("");
     }
   };
@@ -47,13 +44,17 @@ const ChatRoom = () => {
         <button onClick={() => navigate("/")}>Back</button>
         <h1>Chat Room</h1>
       </div>
-      <div className="message-list">
-        {messages.map((message, index) => (
-          <div key={index} className={`message ${message.sender === user.id ? "sent" : "received"}`}>
-            <p>{message.content}</p>
-          </div>
-        ))}
-      </div>
+      {isLoading ? (
+        <p>Loading messages...</p>
+      ) : (
+        <div className="message-list">
+          {messages.map((message, index) => (
+            <div key={index} className={`message ${message.sender === user.id ? "sent" : "received"}`}>
+              <p>{message.content}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="input-area">
         <input
           type="text"

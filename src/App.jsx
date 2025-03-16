@@ -9,7 +9,12 @@ import WelcomePage from "./pages/WelcomePage";
 import "./styles/global.css";
 
 const App = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  // Show a loading spinner or placeholder while validating the token
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Router>

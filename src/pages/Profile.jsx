@@ -1,17 +1,27 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthContext from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import apiClient from "../api/apiClient";
 import "../styles/Profile.css";
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [profilePicture, setProfilePicture] = useState(user?.profilePicture || "");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Initialize state with user data
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setBio(user.bio || "");
+      setProfilePicture(user.profilePicture || "");
+    }
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +52,6 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      {/* Add the header here */}
       <h1 className="profile-header">
         {firstName} {lastName}'s Profile
       </h1>

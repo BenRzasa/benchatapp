@@ -1,65 +1,67 @@
-import React, { createContext, useState, useEffect } from "react";
+// AuthContext.jsx
+import React, { createContext, useState, useEffect, useCallback, useContext } from "react";
 import apiClient from "../api/apiClient";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Check for a stored token on initial load
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      // Fetch user data using the token
-      fetchUserData(token);
+  const validateToken = useCallback(async () => {
+    try {
+      const response = await apiClient.get("/api/auth/userinfo");
+      if (response.data && response.data.user) {
+        console.log("Token validation successful:", response.data.user);
+        setUser(response.data.user);
+      } else {
+        console.error("Token validation failed: User data is missing");
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Token validation failed:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  // Fetch user data using the token
-  const fetchUserData = async (token) => {
-    try {
-      const response = await apiClient.get("/api/auth/userinfo", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUser(response.data.user);
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-      logout(); // Clear invalid token
-    }
-  };
+  // Check for a valid session on initial load
+  useEffect(() => {
+    validateToken();
+  }, [validateToken]);
 
-  // Login function
+  // Function to log in the user
   const login = async (email, password) => {
     try {
       const response = await apiClient.post("/api/auth/login", { email, password });
-      const { token, user } = response.data;
-
-      // Store the token in localStorage
-      localStorage.setItem("authToken", token);
+      const { user } = response.data;
 
       // Set the user in state
       setUser(user);
     } catch (error) {
       console.error("Login failed:", error);
+      throw error;
     }
   };
 
-  // Logout function
-  const logout = () => {
-    // Remove the token from localStorage
-    localStorage.removeItem("authToken");
-
-    // Clear the user from state
-    setUser(null);
+  // Function to log out the user
+  const logout = async () => {
+    try {
+      await apiClient.post("/api/auth/logout");
+      setUser(null); // Clear the user state
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);
 
 export default AuthContext;
