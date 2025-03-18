@@ -23,10 +23,9 @@ const Login = () => {
 
     try {
       await login(email, password); // Call the login function from AuthContext
-      console.log("Login successful, redirecting to /main"); // Log redirection
-      navigate("/mainpage");
+      navigate("/mainpage"); // Redirect to the main page after successful login
     } catch (error) {
-      console.error("Login error:", error); // Log the error
+      console.error("Login error:", error);
       setError("Login failed. Please check your email and password.");
     }
   };
@@ -41,7 +40,7 @@ const Login = () => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          autoComplete="username" // Enable auto-fill for email
+          autoComplete="username"
           required
         />
         <input
@@ -49,7 +48,7 @@ const Login = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password" // Enable auto-fill for password
+          autoComplete="current-password"
           required
         />
         <button type="submit">Login</button>

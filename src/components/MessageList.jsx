@@ -1,27 +1,13 @@
-import React, { useState, useEffect, useContext } from "react";
-import AuthContext from "../context/AuthContext";
-import socket from "../api/socket";
+import React from "react";
 
-const MessageList = ({ roomId }) => {
-  const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    socket.emit("getMessages", { roomId });
-
-    socket.on("receiveMessage", (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, [roomId]);
-
+const MessageList = ({ messages, onDeleteMessage }) => {
   return (
-    <div>
+    <div className="message-list">
       {messages.map((message) => (
-        <div key={message.id}>
-          <strong>{message.sender}:</strong> {message.content}
+        <div key={message.id} className="message">
+          <p>{message.content}</p>
+          <small>{new Date(message.timestamp).toLocaleTimeString()}</small>
+          <button onClick={() => onDeleteMessage(message.id)}>Delete</button>
         </div>
       ))}
     </div>

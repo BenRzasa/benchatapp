@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import socket from "../api/socket";
 
-const SendMessage = ({ roomId }) => {
+const SendMessage = ({ contactId }) => {
   const [message, setMessage] = useState("");
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      socket.emit("sendMessage", { roomId, content: message });
+      socket.emit("sendMessage", { recipientId: contactId, content: message });
       setMessage("");
     }
   };
 
   return (
-    <div>
+    <div className="send-message">
       <input
         type="text"
         value={message}

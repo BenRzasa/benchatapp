@@ -1,6 +1,6 @@
-// AuthContext.jsx
 import React, { createContext, useState, useEffect, useCallback, useContext } from "react";
 import apiClient from "../api/apiClient";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -8,37 +8,38 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const validateToken = useCallback(async () => {
+  // Fetch user data after login
+  const fetchUserData = useCallback(async () => {
     try {
       const response = await apiClient.get("/api/auth/userinfo");
-      if (response.data && response.data.user) {
-        console.log("Token validation successful:", response.data.user);
-        setUser(response.data.user);
+      if (response.data) {
+        setUser(response.data);
       } else {
-        console.error("Token validation failed: User data is missing");
         setUser(null);
       }
     } catch (error) {
-      console.error("Token validation failed:", error);
+      console.error("Failed to fetch user data:", error);
       setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Check for a valid session on initial load
+  // Validate the token and fetch user data on initial load
   useEffect(() => {
-    validateToken();
-  }, [validateToken]);
+    fetchUserData();
+  }, [fetchUserData]);
 
   // Function to log in the user
   const login = async (email, password) => {
     try {
       const response = await apiClient.post("/api/auth/login", { email, password });
-      const { user } = response.data;
-
-      // Set the user in state
-      setUser(user);
+      if (response.data) {
+        // After successful login, fetch user data
+        await fetchUserData();
+      } else {
+        throw new Error("Login failed: Invalid response");
+      }
     } catch (error) {
       console.error("Login failed:", error);
       throw error;

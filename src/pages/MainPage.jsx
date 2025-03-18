@@ -5,6 +5,7 @@ import socket from "../api/socket";
 import ContactList from "../components/ContactList";
 import SearchContacts from "../components/SearchContacts";
 import ChatRoomList from "../components/ChatRoomList";
+import ChatPopup from "../components/ChatPopup";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
@@ -15,20 +16,19 @@ const MainPage = () => {
   const [contacts, setContacts] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoadingRooms, setIsLoadingRooms] = useState(false); // Initially disabled
+  const [isLoadingRooms, setIsLoadingRooms] = useState(false);
   const [roomError, setRoomError] = useState("");
+  const [selectedContact, setSelectedContact] = useState(null);
 
   // Fetch chat rooms on component mount
   useEffect(() => {
     if (user) {
       fetchChatRooms();
 
-      // Listen for updated room lists from the server
       socket.on("roomList", (rooms) => {
         setChatRooms(rooms);
       });
 
-      // Listen for new rooms created by the current user
       socket.on("roomCreated", (newRoom) => {
         setChatRooms((prevRooms) => [...prevRooms, newRoom]);
         setShowPopup(true);
@@ -36,19 +36,17 @@ const MainPage = () => {
         setErrorMessage("");
       });
 
-      // Listen for errors
       socket.on("roomError", (error) => {
         setRoomError(error);
       });
 
-      // Cleanup listeners on unmount
       return () => {
         socket.off("roomList");
         socket.off("roomCreated");
         socket.off("roomError");
       };
     }
-  }, [user]); // Only re-run if the user changes
+  }, [user]);
 
   const fetchChatRooms = () => {
     socket.emit("getRooms");
@@ -69,7 +67,7 @@ const MainPage = () => {
   };
 
   const handleEnterRoom = (roomId) => {
-    setIsLoadingRooms(true); // Enable loading when a room is selected
+    setIsLoadingRooms(true);
     navigate(`/room/${roomId}`);
   };
 
@@ -79,8 +77,6 @@ const MainPage = () => {
   };
 
   const handleAddContact = (newContact) => {
-    console.log("New Contact:", newContact); // Debugging
-
     const firstName = newContact.firstName;
     const lastName = newContact.lastName;
 
@@ -100,6 +96,10 @@ const MainPage = () => {
     } else {
       alert("Contact already added!");
     }
+  };
+
+  const handleContactClick = (contact) => {
+    setSelectedContact(contact);
   };
 
   return (
@@ -134,7 +134,7 @@ const MainPage = () => {
         </div>
 
         <div className="right-side">
-          <ContactList contacts={contacts} />
+          <ContactList contacts={contacts} onContactClick={handleContactClick} />
           <SearchContacts onAddContact={handleAddContact} />
         </div>
 
@@ -142,6 +142,10 @@ const MainPage = () => {
           <div className="success-popup">
             <p>Room "{newRoomName}" created successfully!</p>
           </div>
+        )}
+
+        {selectedContact && (
+          <ChatPopup contact={selectedContact} onClose={() => setSelectedContact(null)} />
         )}
       </div>
     </div>
