@@ -1,40 +1,84 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import socket from "../api/socket";
+import MessageList from "./MessageList";
 import "../styles/ChatPopup.css";
-import MessageList from "./MessageList"; // Import MessageList component
+import AuthContext from "../context/AuthContext";
+import apiClient from "../api/apiClient";
 
 const ChatPopup = ({ contact, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const { user } = useContext(AuthContext);
+
+  const fetchMessages = useCallback(async () => {
+    if (!user || !user.id) {
+      console.error("User is not authenticated or user ID is undefined");
+      return;
+    }
+
+    console.log(`Fetching messages for contact ID: ${contact._id} and user ID: ${user.id}`); // Use _id instead of id
+
+    try {
+      const response = await apiClient.post("/api/messages/get-messages", {
+        id: contact._id, // Use _id instead of id
+      });
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
+  }, [contact._id, user]); // Use _id instead of id
 
   useEffect(() => {
-    // Fetch messages for the selected contact
-    socket.emit("getMessages", { contactId: contact.id });
+    fetchMessages();
 
-    // Listen for new messages
-    socket.on("receiveMessage", (message) => {
-      if (message.sender.id === contact.id || message.recipient.id === contact.id) {
+    const receiveMessageHandler = (message) => {
+      console.log(`Received new message:`, message);
+      if (message.sender.id === contact._id || message.recipient.id === user.id) {
         setMessages((prevMessages) => [...prevMessages, message]);
       }
-    });
+    };
+
+    socket.on("receiveMessage", receiveMessageHandler);
 
     return () => {
-      socket.off("receiveMessage");
+      console.log(`Cleaning up event listeners for contact ID: ${contact._id}`); // Use _id instead of id
+      socket.off("receiveMessage", receiveMessageHandler);
     };
-  }, [contact.id]);
+  }, [contact._id, user, fetchMessages]); // Use _id instead of id and include fetchMessages in dependencies
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      socket.emit("sendMessage", { recipientId: contact.id, content: newMessage });
+    if (!contact || !contact._id) { // Use _id instead of id
+      console.error("Contact ID is undefined");
+      return;
+    }
+    if (newMessage.trim() && user && user.id) {
+      console.log(`Sending message to contact ID: ${contact._id}`, newMessage); // Use _id instead of id
+      socket.emit("sendMessage", {
+        sender: user.id, // The current user's ID
+        recipient: contact._id, // Use _id instead of id
+        content: newMessage, // The message content
+      });
+
+      // Fetch messages again after sending a message
+      fetchMessages();
+
       setNewMessage("");
-      console.log(`Message sent to ${contact.firstName}: ${newMessage}`); // Console confirmation
+    } else {
+      console.error("User is not authenticated or message is empty");
     }
   };
 
-  const handleDeleteMessage = (messageId) => {
-    socket.emit("deleteMessage", { messageId });
-    setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== messageId));
+  const handleDeleteMessage = async (messageId) => {
+    console.log(`Deleting message with ID: ${messageId}`);
+    try {
+      await apiClient.delete(`/api/contacts/delete-dm/${messageId}`);
+      console.log("Message deleted successfully");
+      // Fetch messages again after deleting a message
+      fetchMessages();
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
   };
 
   return (
@@ -48,9 +92,7 @@ const ChatPopup = ({ contact, onClose }) => {
           </button>
         </div>
         <div className="card-body">
-          <div className="messages-container">
-            <MessageList messages={messages} onDeleteMessage={handleDeleteMessage} />
-          </div>
+          <MessageList messages={messages} onDeleteMessage={handleDeleteMessage} user={user} />
           <div className="message-input">
             <form onSubmit={handleSendMessage}>
               <textarea

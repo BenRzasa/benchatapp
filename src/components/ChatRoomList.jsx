@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const ChatRoomList = ({ chatRooms, onEnterRoom, isLoading, error }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="chat-room-list">
       <h2>Chat Rooms</h2>
@@ -11,7 +14,7 @@ const ChatRoomList = ({ chatRooms, onEnterRoom, isLoading, error }) => {
       <div className="scrollable-list">
         <ul>
           {chatRooms.map((room) => (
-            <li key={room.id} onClick={() => onEnterRoom(room.id)}>
+            <li key={room.id} onClick={() => navigate(`/chat-room/${room.id}`)}>
               {room.name}
             </li>
           ))}

@@ -1,0 +1,83 @@
+.message-list {
+    height: 300px; /* Set a fixed height for scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .message-bubble {
+    max-width: 70%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    color: black; /* Set font color to black */
+  }
+  
+  .message-bubble.sent {
+    background-color: #007bff; /* Blue for sent messages */
+    align-self: flex-end;
+    margin-left: auto;
+  }
+  
+  .message-bubble.received {
+    background-color: #ff0000; /* Red for received messages */
+    align-self: flex-start;
+    margin-right: auto;
+  }
+  
+  .message-content {
+    flex-grow: 1;
+  }
+  
+  .delete-button {
+    margin-left: 5px;
+    background: none;
+    border: none;
+    color: #ffffff; /* White for delete button */
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  /* Add some padding to the message list to prevent overlap with the scroll bar */
+  .message-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .message-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .message-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+  
+  .message-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+  
+  /* Triangle for sent messages */
+  .message-bubble.sent::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: -10px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #007bff transparent transparent; /* Blue for sent messages */
+  }
+  
+  /* Triangle for received messages */
+  .message-bubble.received::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -10px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #ff0000; /* Red for received messages */
+  }

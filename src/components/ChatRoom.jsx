@@ -13,6 +13,7 @@ const ChatRoom = () => {
   const [isLoading, setIsLoading] = useState(true); // Enable loading when entering the room
 
   useEffect(() => {
+    // Fetch messages for the room
     socket.emit("joinRoom", { roomId });
 
     socket.on("receiveMessage", (message) => {
