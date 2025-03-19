@@ -6,7 +6,7 @@ const ContactList = ({ contacts, onContactClick }) => {
 
   return (
     <div className="contact-list">
-      <h2>Contacts</h2>
+      <h2>Your Contacts</h2>
       <div className="scrollable-list">
         <ul>
           {displayedContacts.map((contact) => (

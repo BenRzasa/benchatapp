@@ -24,7 +24,7 @@
   }
   
   .message-bubble.received {
-    background-color: #ff0000; /* Red for received messages */
+    background-color: #ff7e7e; /* Red for received messages */
     align-self: flex-start;
     margin-right: auto;
   }
@@ -68,7 +68,7 @@
     right: -10px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent #007bff transparent transparent; /* Blue for sent messages */
+    border-color: transparent #000000 transparent transparent; /* Blue for sent messages */
   }
   
   /* Triangle for received messages */
@@ -79,5 +79,5 @@
     left: -10px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent transparent transparent #ff0000; /* Red for received messages */
+    border-color: transparent transparent transparent #000000; /* Red for received messages */
   }

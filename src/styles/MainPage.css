@@ -107,10 +107,6 @@
   margin-left: 35%; /* Offset from the left to align with the right side */
 }
 
-.chat-room-list {
-  margin-top: 20px;
-}
-
 .scrollable-list {
   max-height: 150px; /* Adjust this value to fit 5 entries */
   overflow-y: auto; /* Enable vertical scrolling */
@@ -136,31 +132,6 @@
   background-color: #f1f1f1;
 }
 
-.create-room-section {
-  margin-top: 20px;
-}
-
-.create-room-section input {
-  padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.create-room-section button {
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.create-room-section button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
 .error-message {
   color: #dc3545;
   margin-top: 10px;
@@ -177,62 +148,11 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Create Room Popup Styles */
-.create-room-popup {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px; /* Larger padding */
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: absolute; /* Position the popup absolutely */
-  top: 500%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  width: 400px; /* Larger width */
-}
-
-.create-room-popup p {
-  font-size: 18px;
-  color: #fff;
-  margin-bottom: 20px;
-}
-
-.create-room-input {
-  display: flex;
-  gap: 10px;
-}
-
-.create-room-input input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  background-color: rgba(255, 255, 255, 0.8);
-  width: 100%;
-}
-
-.create-room-input button {
-  padding: 10px 20px;
-  background-color: #100720;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-.create-room-input button:hover {
-  background-color: #0056b3;
-}
-
 /* Contact List Styles */
 .contact-list {
   position: absolute; /* Position the contacts list absolutely */
   top: 100px; /* Offset from the top */
-  right: -450px; /* Offset from the right */
+  right: -425px; /* Offset from the right */
   width: 40%; /* Adjust width to fit the right side */
   height: calc(100vh - 300px); /* Adjust height to avoid overlap */
   overflow-y: auto; /* Add scroll if content overflows */
@@ -261,19 +181,20 @@
 
 /* Search Contacts */
 .search-contacts {
-  position: absolute; /* Position the search section absolutely */
-  bottom: -1100px; /* Offset from the bottom */
-  right: -400px; /* Offset from the right */
+  position: relative; /* Position the search section absolutely */
+  bottom: -50px; /* Offset from the bottom */
+  right: -500px; /* Offset from the right */
   background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 25px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
   padding: 20px;
-  width: 30%; /* Adjust width to fit the right side */
+  width: 40%; /* Adjust width to fit the right side */
 }
 
 .search-contacts h2 {
   font-size: 1.5rem;
   color: #fff;
+  margin-top: 0px;
   margin-bottom: 10px;
 }
 
@@ -322,10 +243,11 @@
 
 /* User's Contacts */
 .scrollable-list {
-  max-height: 200px; /* Set the maximum height for the list */
+  max-height: 350px; /* Set the maximum height for the list */
   overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid #ccc; /* Optional: Add a border for better visibility */
   border-radius: 5px; /* Optional: Add rounded corners */
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
   padding: 10px; /* Optional: Add padding */
   background-color: rgba(255, 255, 255, 0.1); /* Optional: Add a background color */
 }
@@ -351,30 +273,6 @@
 /* Remove border from the last item */
 .scrollable-list li:last-child {
   border-bottom: none;
-}
-
-.create-room-section {
-  margin-top: 20px;
-}
-
-.create-room-section input {
-  padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.create-room-section button {
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.create-room-section button:hover {
-  background-color: #0056b3;
 }
 
 .success-popup {
@@ -447,4 +345,71 @@
   to {
     transform: translate(-50%, -50%) rotate(360deg);
   }
+}
+
+/* Chat Rooms List */
+.chat-room-section {
+  margin-top: 25px;
+  padding: 25px;
+  background-color: #112f57;
+  border-radius: 25px;
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.chat-room-section h2 {
+  padding: 0px 0px
+}
+
+.room-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.room-button {
+  align-items: center;
+  background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
+  box-sizing: border-box;
+  color: #ffffff;
+  display: flex;
+  font-size: 18px;
+  justify-content: center;
+  line-height: 1em;
+  max-width: 100%;
+  min-width: 140px;
+  padding: 3px;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.room-button:active,
+.room-button:hover {
+  outline: 0;
+}
+
+.room-button span {
+  background-color: rgb(5, 6, 45);
+  padding: 16px 24px;
+  border-radius: 6px;
+  width: 100%;
+  height: 100%;
+  transition: 300ms;
+}
+
+.room-button:hover span {
+  background: none;
+}
+
+.room-button:active {
+  transform: scale(0.9);
 }

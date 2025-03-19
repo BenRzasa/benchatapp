@@ -1,100 +1,68 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
-import socket from "../api/socket"; // Import the socket instance
+import apiClient from "../api/apiClient";
 import ContactList from "../components/ContactList";
 import SearchContacts from "../components/SearchContacts";
-import ChatRoomList from "../components/ChatRoomList";
 import ChatPopup from "../components/ChatPopup";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [chatRooms, setChatRooms] = useState([]);
-  const [newRoomName, setNewRoomName] = useState("");
-  const [contacts, setContacts] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
+  const [contacts, setContacts] = useState([]); // List of all contacts
+  const [chatRooms, setChatRooms] = useState([]); // List of chat rooms (contacts with active chats)
+  const [selectedContact, setSelectedContact] = useState(null); // Selected contact for ChatPopup
+  const [isLoadingContacts, setIsLoadingContacts] = useState(true); // Loading state for contacts
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoadingRooms, setIsLoadingRooms] = useState(true); // Initially loading rooms
-  const [roomError, setRoomError] = useState("");
-  const [selectedContact, setSelectedContact] = useState(null);
 
+  // Fetch contacts ONCE on component mount
   useEffect(() => {
-    if (!user) return;
-
-    console.log("Establishing socket connection..."); // Debugging log
-
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server"); // Debugging log
-      fetchChatRooms();
-    });
-
-    socket.on("roomList", (rooms) => {
-      console.log("Received roomList event:", rooms); // Debugging log
-      setChatRooms(rooms);
-      setIsLoadingRooms(false); // Stop loading once rooms are fetched
-    });
-
-    socket.on("roomCreated", (newRoom) => {
-      console.log("Received roomCreated event:", newRoom); // Debugging log
-      setChatRooms((prevRooms) => [...prevRooms, newRoom]);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-      setErrorMessage("");
-      setRoomError(""); // Clear any previous room errors
-    });
-
-    socket.on("roomError", (error) => {
-      console.log("Received roomError event:", error); // Debugging log
-      setRoomError(error);
-      setIsLoadingRooms(false); // Stop loading in case of error
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("roomList");
-      socket.off("roomCreated");
-      socket.off("roomError");
-    };
+    if (user) {
+      fetchContacts();
+    }
   }, [user]);
 
-  const fetchChatRooms = () => {
-    console.log("Fetching chat rooms..."); // Debugging log
-    setIsLoadingRooms(true); // Start loading when fetching rooms
-    socket.emit("getRooms");
-  };
-
-  const handleCreateRoom = () => {
-    if (newRoomName.trim()) {
-      setRoomError(""); // Clear any previous room errors
-      console.log("Creating room with name:", newRoomName); // Debugging log
-      socket.emit("createRoom", { name: newRoomName }, (response) => {
-        console.log("Create room response:", response); // Debugging log
-        if (response.success) {
-          setNewRoomName("");
-          setErrorMessage("");
-        } else {
-          setRoomError("Failed to create room. Please try again.");
-        }
-      });
-    } else {
-      setRoomError("Please enter a valid room name.");
+  // Fetch contacts using the REST API
+  const fetchContacts = async () => {
+    console.log("Fetching contacts...");
+    setIsLoadingContacts(true); // Start loading
+    try {
+      const response = await apiClient.get("/api/contacts/get-contacts-for-list");
+      console.log("Contacts fetched:", response.data);
+      setContacts(response.data.contacts); // Update contacts state
+      setIsLoadingContacts(false); // Stop loading
+    } catch (error) {
+      console.error("Failed to fetch contacts:", error);
+      setErrorMessage("Failed to fetch contacts. Please try again.");
+      setIsLoadingContacts(false); // Stop loading in case of error
     }
   };
 
-  const handleEnterRoom = (roomId) => {
-    console.log("Entering room with ID:", roomId); // Debugging log
-    setIsLoadingRooms(true); // Start loading when entering a room
-    navigate(`/room/${roomId}`);
+  // Handle searching for contacts
+  const handleSearchContacts = async (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setErrorMessage("Please enter a search term.");
+      return;
+    }
+
+    try {
+      const response = await apiClient.post("/api/contacts/search", {
+        searchTerm: searchTerm,
+      });
+      console.log("Search results:", response.data);
+      if (response.data.contacts.length > 0) {
+        setContacts(response.data.contacts); // Update contacts state with search results
+      } else {
+        setErrorMessage("No contacts found.");
+      }
+    } catch (error) {
+      console.error("Failed to search for contacts:", error);
+      setErrorMessage("Failed to search for contacts. Please try again.");
+    }
   };
 
-  const handleLogout = () => {
-    console.log("Logging out..."); // Debugging log
-    logout();
-    navigate("/login");
-  };
-
+  // Handle adding a new contact
   const handleAddContact = (newContact) => {
     const firstName = newContact.firstName;
     const lastName = newContact.lastName;
@@ -111,15 +79,33 @@ const MainPage = () => {
     );
 
     if (!isContactAlreadyAdded) {
-      setContacts((prevContacts) => [...prevContacts, newContact]);
+      setContacts((prevContacts) => [...prevContacts, newContact]); // Directly add the contact
     } else {
       alert("Contact already added!");
     }
   };
 
+  // Handle clicking on a contact to create a chat room
   const handleContactClick = (contact) => {
-    console.log("Contact clicked:", contact); // Debugging log
+    console.log("Contact clicked:", contact);
     setSelectedContact(contact);
+
+    // Add the contact to the chat rooms list if not already present
+    const isRoomAlreadyCreated = chatRooms.some((room) => room._id === contact._id);
+    if (!isRoomAlreadyCreated) {
+      setChatRooms((prevRooms) => [...prevRooms, contact]);
+    }
+  };
+
+  // Handle closing the ChatPopup
+  const handleCloseChatPopup = () => {
+    setSelectedContact(null);
+  };
+
+  const handleLogout = () => {
+    console.log("Logging out..."); // Debugging log
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -137,57 +123,42 @@ const MainPage = () => {
         <div className="left-side">
           <div className="chat-room-section">
             <h2>Chat Rooms</h2>
-            {isLoadingRooms ? (
-              <p>Loading chat rooms...</p>
-            ) : chatRooms.length === 0 ? (
-              <p>No rooms. Create one below:</p>
-            ) : (
-              <ChatRoomList
-                chatRooms={chatRooms}
-                onEnterRoom={handleEnterRoom}
-                isLoading={isLoadingRooms}
-                error={roomError}
-              />
-            )}
-            <div className="create-room-section">
-              <h3>Create a New Room</h3>
-              <input
-                type="text"
-                placeholder="Enter Room Name"
-                value={newRoomName}
-                onChange={(e) => setNewRoomName(e.target.value)}
-              />
-              <button onClick={handleCreateRoom}>Create Room</button>
-              {roomError && <div className="error-message">{roomError}</div>}
-              {errorMessage && <div className="error-message">{errorMessage}</div>}
+            <div className="room-list">
+              {chatRooms.length === 0 ? (
+                <p>No active chats. Click on a contact to start a chat!</p>
+              ) : (
+                chatRooms.map((room) => (
+                  <button
+                    key={room._id}
+                    className="room-button"
+                    onClick={() => setSelectedContact(room)}
+                  >
+                    <span className="text">{room.firstName}'s Room</span>
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>
 
         <div className="right-side">
           <div className="contact-section">
-            <h2>Contacts</h2>
-            <ContactList contacts={contacts} onContactClick={handleContactClick} />
-            <SearchContacts onAddContact={handleAddContact} />
+            {isLoadingContacts ? (
+              <p>Loading contacts...</p>
+            ) : contacts.length === 0 ? (
+              <p> - </p>
+            ) : (
+              <>
+                <p> 🔥 </p>
+                <ContactList contacts={contacts} onContactClick={handleContactClick} />
+              </>
+            )}
+            <SearchContacts onSearch={handleSearchContacts} onAddContact={handleAddContact} />
           </div>
         </div>
 
-        {showPopup && (
-          <div className="success-popup">
-            <p>Room "{newRoomName}" created successfully!</p>
-          </div>
-        )}
-
         {selectedContact && (
-          <div className="selected-contact">
-            <h3>Selected Contact</h3>
-            <ChatPopup contact={selectedContact} onClose={() => setSelectedContact(null)} />
-            <div className="selected-contact-info">
-              <p>Contact ID: {selectedContact._id}</p> {/* Use _id instead of id */}
-              <p>First Name: {selectedContact.firstName}</p>
-              <p>Last Name: {selectedContact.lastName}</p>
-            </div>
-          </div>
+          <ChatPopup contact={selectedContact} onClose={handleCloseChatPopup} />
         )}
       </div>
     </div>

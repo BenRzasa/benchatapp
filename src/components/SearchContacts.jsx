@@ -36,7 +36,7 @@ const SearchContacts = ({ onAddContact }) => {
 
   return (
     <div className="search-contacts">
-      <h2>Search Contacts</h2>
+      <h2>Search Global Contacts</h2>
       <div className="search-input">
         <input
           type="text"
