@@ -4,16 +4,15 @@
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.3",
     "cross-spawn": "^7.0.6",
+    "dompurify": "^3.2.4",
+    "eslint-config-react-app": "^7.0.1",
     "open": "^10.1.0",
     "puppeteer": "^24.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0",
+    "react-router-dom": "^7.4.0",
     "react-scripts": "^5.0.1",
     "socket.io-client": "^4.8.1",
     "web-vitals": "^2.1.4"
@@ -23,7 +22,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test1": "node test1.js"
+    "dev": "concurrently \"npm start\" \"npm test\""
   },
   "eslintConfig": {
     "extends": [
@@ -42,5 +41,19 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@cypress/react": "^9.0.0",
+    "@cypress/webpack-dev-server": "^4.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
+    "cross-env": "^7.0.3",
+    "css-loader": "^7.1.2",
+    "cypress": "^14.2.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.5.1",
+    "jest-environment-jsdom": "^29.7.0",
+    "style-loader": "^4.0.0"
   }
 }

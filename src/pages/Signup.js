@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../api/apiClient";
 import "../styles/Signup.css";
+import DOMPurify from "dompurify";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -12,16 +13,21 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
+  
+    // Sanitize inputs
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+    const sanitizedConfirmPassword = DOMPurify.sanitize(confirmPassword);
+  
+    if (sanitizedPassword !== sanitizedConfirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
+  
     try {
       await apiClient.post("/api/auth/signup", {
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
       });
       alert("Signup successful! Please login.");
       navigate("/login");
@@ -41,7 +47,7 @@ const Signup = () => {
         setError("Signup failed. Please try again.");
       }
     }
-  };
+  }; 
 
   const handleBackToHome = () => {
     navigate("/");

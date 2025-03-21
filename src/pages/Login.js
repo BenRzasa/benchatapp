@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Login.css";
+import DOMPurify from "dompurify"
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,12 +18,15 @@ const Login = () => {
     setError("");
   }, []);
 
-  // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
+    // Sanitize inputs
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+  
     try {
-      await login(email, password); // Call the login function from AuthContext
+      await login(sanitizedEmail, sanitizedPassword); // Call the login function from AuthContext
       navigate("/mainpage"); // Redirect to the main page after successful login
     } catch (error) {
       console.error("Login error:", error);

@@ -48,6 +48,8 @@ next-env.d.ts
 
 # testing
 /coverage
+# Ignore the testing directory
+src/testing/
 
 # production
 /build

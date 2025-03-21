@@ -43,6 +43,7 @@
   display: flex;
   gap: 10px;
   position: absolute; /* Position the buttons absolutely */
+  z-index: 1000;
   right: 120px; /* Offset from the right edge */
   top: 40px; /* Offset from the top */
 }
@@ -181,14 +182,15 @@
 
 /* Search Contacts */
 .search-contacts {
-  position: relative; /* Position the search section absolutely */
-  bottom: -50px; /* Offset from the bottom */
-  right: -500px; /* Offset from the right */
+  position: relative;
+  bottom: -100px;
+  right: -500px;
   background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid #ccc;
   border-radius: 25px;
   box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
   padding: 20px;
-  width: 40%; /* Adjust width to fit the right side */
+  width: 40%;
 }
 
 .search-contacts h2 {
@@ -243,31 +245,31 @@
 
 /* User's Contacts */
 .scrollable-list {
-  max-height: 350px; /* Set the maximum height for the list */
-  overflow-y: auto; /* Enable vertical scrolling */
-  border: 1px solid #ccc; /* Optional: Add a border for better visibility */
-  border-radius: 5px; /* Optional: Add rounded corners */
+  max-height: 350px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 25px;
   box-shadow: 0 4px 40px rgba(0, 0, 0, 0.2);
-  padding: 10px; /* Optional: Add padding */
-  background-color: rgba(255, 255, 255, 0.1); /* Optional: Add a background color */
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* List Items */
 .scrollable-list ul {
-  list-style: none; /* Remove default list styling */
-  padding: 0; /* Remove default padding */
-  margin: 0; /* Remove default margin */
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .scrollable-list li {
-  padding: 10px; /* Add padding to list items */
-  border-bottom: 1px solid #ccc; /* Add a border between items */
-  cursor: pointer; /* Change cursor to pointer on hover */
-  transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .scrollable-list li:hover {
-  background-color: rgba(255, 255, 255, 0.2); /* Highlight on hover */
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Remove border from the last item */

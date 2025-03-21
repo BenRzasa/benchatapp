@@ -8,12 +8,14 @@ import ChatPopup from "../components/ChatPopup";
 import "../styles/MainPage.css";
 
 const MainPage = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, updateUser } = useContext(AuthContext); // Add updateUser from AuthContext
   const navigate = useNavigate();
   const [contacts, setContacts] = useState([]); // List of all contacts
   const [chatRooms, setChatRooms] = useState([]); // List of chat rooms (contacts with active chats)
   const [selectedContact, setSelectedContact] = useState(null); // Selected contact for ChatPopup
+  // eslint-disable-next-line
   const [isLoadingContacts, setIsLoadingContacts] = useState(true); // Loading state for contacts
+  // eslint-disable-next-line
   const [errorMessage, setErrorMessage] = useState("");
 
   // Fetch contacts ONCE on component mount
@@ -143,16 +145,7 @@ const MainPage = () => {
 
         <div className="right-side">
           <div className="contact-section">
-            {isLoadingContacts ? (
-              <p>Loading contacts...</p>
-            ) : contacts.length === 0 ? (
-              <p> - </p>
-            ) : (
-              <>
-                <p> 🔥 </p>
-                <ContactList contacts={contacts} onContactClick={handleContactClick} />
-              </>
-            )}
+            <ContactList contacts={contacts} onContactClick={handleContactClick} />
             <SearchContacts onSearch={handleSearchContacts} onAddContact={handleAddContact} />
           </div>
         </div>
