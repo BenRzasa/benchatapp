@@ -23,6 +23,7 @@ The page will reload when you make changes.
 You may also see any lint errors in the console.
 
 ### npm run cypress:open
+### npx cypress open if the above doesn't work
 Runs the Cypress test runner to open the UI for running tests. 
 Ensure you have Cypress installed (npm install cypress --save-dev) if it's not already included in your project.
 
