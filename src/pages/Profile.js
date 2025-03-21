@@ -5,39 +5,32 @@ import apiClient from "../api/apiClient";
 import "../styles/Profile.css";
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser } = useAuth(); // Destructure updateUser
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [color, setColor] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // Fetch user data on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await apiClient.get("/api/auth/userinfo");
-        if (response.data) {
-          setFirstName(response.data.firstName || "");
-          setLastName(response.data.lastName || "");
-          setColor(response.data.color || "");
-          console.log("Fetched user data successfully")
-        } else {
-          throw new Error("Failed to fetch user data");
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        setError("Failed to fetch user data.");
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+    }
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedUser = { firstName, lastName, color };
+      if (!user?.id) {
+        throw new Error("User ID is missing. Please log in again.");
+      }
+
+      const updatedUser = {
+        firstName,
+        lastName,
+        profileSetup: true, // Set profileSetup to true
+      };
 
       console.log("Sending request body:", updatedUser); // Log the request body
 
@@ -46,7 +39,8 @@ const Profile = () => {
       console.log("Received response:", response.data); // Log the response
 
       if (response.data) {
-        await updateUser(response.data.user);
+        // Update the user in the AuthContext
+        await updateUser(response.data);
         alert("Profile updated successfully!");
         navigate("/mainpage");
       } else {
@@ -69,18 +63,14 @@ const Profile = () => {
           placeholder="First Name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
+          required
         />
         <input
           type="text"
           placeholder="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Favorite Color (e.g., #ff5733)"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
+          required
         />
         {error && <p className="error">{error}</p>}
         <button type="submit">Save</button>

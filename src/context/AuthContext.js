@@ -55,8 +55,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Function to update user data
+  const updateUser = useCallback(async (updatedUserData) => {
+    try {
+      // Update the user state
+      setUser((prevUser) => ({ ...prevUser, ...updatedUserData }));
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
